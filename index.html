@@ -81,7 +81,7 @@
     @page { size:A4 portrait; margin:11mm 10mm; }
   }
   .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  @media (max-width:760px){
+  @media screen and (max-width:760px){
     .wrap{padding:12px;}
     .app-head{padding:14px 16px;}
     .app-head h1{font-size:18px;}
@@ -90,26 +90,19 @@
     .grid2,.grid4{grid-template-columns:1fr 1fr;}
     .terms-pick{grid-template-columns:1fr 1fr;}
     input[type=text],input[type=number]{font-size:16px;}
-    table.marks,table.ctab{min-width:620px;}
+    table.marks{min-width:620px;}
     table.marks input[type=number]{width:64px;}
     .term-sec-head{flex-wrap:wrap;}
     .term-sec-head input{width:100%;}
     .term-stats{margin-left:0;}
     .actions{flex-direction:column;}
     .actions button{width:100%;}
-    #card{padding:18px 12px;font-size:12px;}
-    #card .chead h1{font-size:23px;}
-    #card .chead img{width:54px;}
-    #card .info{grid-template-columns:100px 1fr;font-size:12px;}
-    #card .termline{flex-direction:column;gap:2px;}
-    #card .termline .nums b{margin-left:0;margin-right:16px;}
-    #card .sig{flex-direction:column;gap:16px;}
-    #card .tfoot{flex-wrap:wrap;gap:6px;}
+    /* The result card keeps the exact official template layout on all screens */
+    .card-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    #card{min-width:720px;}
   }
-  @media (max-width:480px){
+  @media screen and (max-width:480px){
     .grid2,.grid4,.terms-pick{grid-template-columns:1fr;}
-    #card .chead h1{font-size:19px;}
-    #card .twmc{font-size:13px;}
   }
 </style>
 </head>
@@ -127,10 +120,10 @@
       <div style="background:#faf0fa;border:2px dashed var(--purple);border-radius:8px;padding:12px 14px;margin-bottom:14px">
         <label class="f" style="color:var(--purple-dark)">⚡ Quick fill — type the student serial number and press Enter</label>
         <div style="display:flex;gap:10px;margin-top:6px;align-items:center">
-          <input type="text" id="q_serial" placeholder="e.g. 205" style="max-width:200px" onkeydown="if(event.key==='Enter')quickFill()">
+          <input type="text" id="q_serial" placeholder="e.g. 300" style="max-width:200px" onkeydown="if(event.key==='Enter')quickFill()">
           <button class="btn-gen" style="padding:9px 22px" onclick="quickFill()">Fill →</button>
         </div>
-        <p class="hint" style="margin:6px 0 0">Fills Roll No. as <b>SU92-BSSEM-F22-205</b> and Registration No. as <b>SU-F22-942353205</b>. You can still edit both fields below.</p>
+        <p class="hint" style="margin:6px 0 0">Fills Roll No. as <b>SU92-BSSEM-F22-300</b> and Registration No. as <b>SU-F22-942353300</b>. You can still edit both fields below.</p>
       </div>
       <div class="grid4">
         <div><label class="f">Roll No.</label><input type="text" id="s_roll" placeholder="e.g. SU92-BSSEM-F22-300"></div>
@@ -167,7 +160,7 @@
       <button class="btn-gen" id="pdfBtn1" onclick="downloadPDF(this)">⬇️ Download PDF</button>
       <button class="btn-back" onclick="backToBuilder()">← Back to edit</button>
     </div>
-    <div id="card"></div>
+    <div class="card-scroll"><div id="card"></div></div>
     <div class="actions no-print" style="margin-top:18px">
       <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
       <button class="btn-gen" id="pdfBtn2" onclick="downloadPDF(this)">⬇️ Download PDF</button>
@@ -293,7 +286,7 @@ function cumulative(uptoT){
 /* ---------------- Builder rendering ---------------- */
 function quickFill(){
   const s=document.getElementById("q_serial").value.trim();
-  if(!s){ alert("Type the student serial number first (e.g. 205)."); return; }
+  if(!s){ alert("Type the student serial number first (e.g. 300)."); return; }
   document.getElementById("s_roll").value="SU92-BSSEM-F22-"+s;
   document.getElementById("s_reg").value="SU-F22-942353"+s;
 }
