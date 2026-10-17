@@ -73,6 +73,7 @@
   .no-print { }
 
   @media print {
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
     body { background:#fff; }
     .app-head, #builder, .actions.no-print { display:none !important; }
     #preview { display:block !important; }
@@ -314,27 +315,44 @@ function renderMarks(){
       return `<tr>
         <td>${ci+1}</td><td>${esc(c.code)}</td><td>${esc(c.title)}</td>
         <td>${c.cr.toFixed(2)}</td>
-        <td><input type="number" min="0" value="${totals[ti][ci]}" style="width:76px" onchange="setTotal(${ti},${ci},this.value)"></td>
-        <td><input type="number" min="0" max="${tot}" value="${esc(obt)}" placeholder="—" style="width:76px" onchange="setObt(${ti},${ci},this.value)" oninput="setObt(${ti},${ci},this.value)"></td>
-        <td><span class="grade-badge">${showGrade}</span></td>
+        <td><input type="number" inputmode="numeric" min="0" value="${totals[ti][ci]}" style="width:76px" oninput="onTotInput(${ti},${ci},this)"></td>
+        <td><input type="number" inputmode="numeric" min="0" max="${tot}" value="${esc(obt)}" placeholder="—" style="width:76px" oninput="onObtInput(${ti},${ci},this)"></td>
+        <td><span class="grade-badge" id="g_${ti}_${ci}">${showGrade}</span></td>
       </tr>`;
     }).join("");
     html+=`<div class="term-sec">
       <div class="term-sec-head">
         <input type="text" value="${esc(termLabels[ti])}" onchange="termLabels[${ti}]=this.value;renderTermsPick();">
-        <span class="term-stats">SGPA: ${f2(s.sgpa)} &nbsp;•&nbsp; ${f2(s.pctAll)} %</span>
+        <span class="term-stats" id="ts_${ti}">SGPA: ${f2(s.sgpa)} &nbsp;•&nbsp; ${f2(s.pctAll)} %</span>
       </div>
       <div class="tscroll"><table class="marks">
         <tr><th>Sr#</th><th>Course Code</th><th>Course Title</th><th>Credit Hrs</th><th>Total Marks</th><th>Obtained Marks</th><th>Grade</th></tr>
         ${rows}
-        <tr class="total"><td colspan="3">Total</td><td>${s.cr.toFixed(2)}</td><td>${s.tm}</td><td>${f2(s.ob)}</td><td></td></tr>
+        <tr class="total"><td colspan="3">Total</td><td id="tcr_${ti}">${s.cr.toFixed(2)}</td><td id="ttm_${ti}">${s.tm}</td><td id="tob_${ti}">${f2(s.ob)}</td><td></td></tr>
       </table></div>
     </div>`;
   });
   w.innerHTML = html || `<p class="hint">Select at least one semester above.</p>`;
 }
-function setTotal(ti,ci,v){ totals[ti][ci]=v; renderMarks(); }
-function setObt(ti,ci,v){ obtained[ti][ci]=v; renderMarks(); }
+/* In-place updates: the table is NOT rebuilt while typing, so the keyboard
+   focus and the horizontal scroll position are never lost on mobile. */
+function onTotInput(ti,ci,el){ totals[ti][ci]=el.value; refreshTerm(ti); }
+function onObtInput(ti,ci,el){ obtained[ti][ci]=el.value; refreshTerm(ti); }
+function refreshTerm(ti){
+  TERMS[ti].courses.forEach((c,ci)=>{
+    const tot=num(totals[ti][ci])||0, obt=obtained[ti][ci];
+    const pct=tot>0?num(obt)/tot*100:0;
+    const badge=document.getElementById("g_"+ti+"_"+ci);
+    if(badge) badge.textContent = String(obt).trim()==="" ? "–" : gradeFor(pct)[0];
+  });
+  const s=termStats(ti);
+  const ts=document.getElementById("ts_"+ti);
+  if(ts) ts.innerHTML="SGPA: "+f2(s.sgpa)+" &nbsp;•&nbsp; "+f2(s.pctAll)+" %";
+  const set=function(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+  set("tcr_"+ti, s.cr.toFixed(2));
+  set("ttm_"+ti, s.tm);
+  set("tob_"+ti, f2(s.ob));
+}
 
 /* ---------------- Result card generation (matches official template) ---------------- */
 function val(id){ return document.getElementById(id).value.trim(); }
